@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Notre année</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --ff:'Plus Jakarta Sans',system-ui,sans-serif;
+  --fs:'Instrument Serif',Georgia,serif;
+  --bg:#fdf5ec;--card:#fffaf2;--ink:#2a1f15;--muted:#9c8775;--rule:#ead9c5;
+  --acc:#c97355;--accl:rgba(201,115,85,0.12);--r:12px;
+  --sb:260px;
+}
+html,body{height:100%;overflow:hidden;font-family:var(--ff);}
+body{background:var(--bg);}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--rule);border-radius:3px;}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:var(--sb) 1fr;height:100dvh;background:var(--bg);}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  display:flex;flex-direction:column;
+  border-right:.5px solid var(--rule);
+  padding:32px 0 24px;
+  overflow:hidden;
+  background:var(--card);
+  position:relative;
+  z-index:5;
+}
+.sb-logo{padding:0 24px 28px;border-bottom:.5px solid var(--rule);margin-bottom:20px;}
+.sb-logo-title{font-size:22px;font-weight:800;color:var(--ink);line-height:1;letter-spacing:-.02em;}
+.sb-logo-title em{font-family:var(--fs);font-style:italic;font-weight:400;}
+.sb-year{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:3px 10px;background:var(--accl);border-radius:50px;font-size:12px;font-weight:600;color:var(--acc);}
+.sb-year-dot{width:6px;height:6px;border-radius:50%;background:var(--acc);}
+
+.sb-nav{flex:1;padding:0 12px;display:flex;flex-direction:column;gap:2px;}
+.sb-btn{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;border:none;background:none;color:var(--muted);font-size:14px;font-family:var(--ff);font-weight:500;cursor:pointer;width:100%;text-align:left;transition:background .13s,color .13s;}
+.sb-btn:hover{background:var(--accl);color:var(--ink);}
+.sb-btn.on{background:var(--accl);color:var(--acc);font-weight:600;}
+.sb-btn svg{width:18px;height:18px;flex-shrink:0;}
+
+.sb-season-group{margin-top:8px;padding-top:10px;border-top:.5px solid var(--rule);}
+.sb-season-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 12px;margin-bottom:4px;display:block;}
+
+.sb-bottom{padding:16px 12px 0;border-top:.5px solid var(--rule);margin-top:auto;}
+.sb-count{font-size:12px;color:var(--muted);padding:4px 12px;margin-bottom:8px;}
+.sb-count strong{color:var(--ink);}
+
+/* ── MAIN ── */
+.main{overflow:hidden;position:relative;}
+.screen{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;transition:opacity .22s ease,transform .22s ease;}
+.screen.off{opacity:0;pointer-events:none;transform:translateY(12px);}
+
+/* ── COVER ── */
+.cover{min-height:100%;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:60px;gap:60px;}
+@media(max-width:900px){.cover{grid-template-columns:1fr;padding:40px;gap:40px;}}
+.cover-left{}
+.cover-eyebrow{font-size:11px;font-weight:600;color:var(--acc);letter-spacing:.08em;text-transform:uppercase;margin-bottom:20px;}
+.cover-title{font-size:clamp(48px,5vw,72px);font-weight:800;color:var(--ink);line-height:1;letter-spacing:-.03em;margin-bottom:20px;}
+.cover-title em{font-family:var(--fs);font-style:italic;font-weight:400;}
+.cover-subtitle{font-size:16px;color:var(--muted);line-height:1.6;max-width:340px;margin-bottom:8px;}
+.cover-count{font-size:13px;color:var(--acc);font-weight:600;margin-bottom:36px;}
+.cover-cta{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--bg);border:none;border-radius:50px;padding:15px 32px;font-size:15px;font-weight:600;font-family:var(--ff);cursor:pointer;transition:transform .14s,opacity .14s;}
+.cover-cta:hover{opacity:.88;}
+.cover-cta:active{transform:scale(.97);}
+.cover-cta-dot{width:8px;height:8px;border-radius:50%;background:var(--acc);}
+
+.cover-right{position:relative;height:520px;}
+.pile-wrap{position:relative;width:100%;height:100%;}
+.pile-card{position:absolute;border-radius:18px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.16);}
+.pile-card img{width:100%;height:100%;object-fit:cover;display:block;}
+.pile-card:nth-child(1){width:260px;height:340px;top:80px;left:50%;transform:translateX(-50%) rotate(-4deg);z-index:1;}
+.pile-card:nth-child(2){width:240px;height:310px;top:50px;left:5%;z-index:2;transform:rotate(3deg);}
+.pile-card:nth-child(3){width:250px;height:320px;top:70px;right:0%;z-index:3;transform:rotate(-2.5deg);}
+
+/* ── GALLERY ── */
+.gallery{min-height:100%;}
+.gal-bar{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:.5px solid var(--rule);padding:20px 32px 14px;display:flex;flex-direction:column;gap:10px;}
+.gal-bar-top{display:flex;align-items:center;gap:16px;}
+.gal-title{font-size:20px;font-weight:700;color:var(--ink);flex:1;}
+.gal-title em{font-family:var(--fs);font-style:italic;font-weight:400;}
+.search-wrap{position:relative;width:280px;}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none;}
+.search-in{width:100%;padding:8px 12px 8px 32px;border-radius:10px;border:1px solid var(--rule);background:var(--card);color:var(--ink);font-size:14px;font-family:var(--ff);outline:none;}
+.search-in:focus{border-color:var(--acc);}
+.chips{display:flex;gap:6px;flex-wrap:nowrap;overflow-x:auto;}
+.chip{flex-shrink:0;padding:5px 14px;border-radius:50px;border:1px solid var(--rule);background:var(--card);color:var(--muted);font-size:13px;font-weight:500;font-family:var(--ff);cursor:pointer;white-space:nowrap;transition:all .13s;}
+.chip:hover{border-color:var(--acc);color:var(--acc);}
+.chip.on{background:var(--ink);border-color:var(--ink);color:var(--bg);}
+
+.gal-content{padding:20px 32px 40px;}
+.season-hd{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:8px 0 10px;}
+.mosaic{columns:3;gap:12px;}
+.mosaic.compact{columns:4;}
+.mosaic.spacious{columns:2;}
+.mphoto{break-inside:avoid;margin-bottom:12px;border-radius:var(--r);overflow:hidden;cursor:pointer;position:relative;background:var(--rule);transition:transform .14s,box-shadow .14s;}
+.mphoto:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.14);}
+.mphoto img{width:100%;display:block;aspect-ratio:3/4;object-fit:cover;}
+.mosaic.spacious .mphoto img{aspect-ratio:4/3;}
+.fav-pin{position:absolute;top:9px;right:9px;width:26px;height:26px;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;}
+.mcaption{padding:7px 10px 9px;background:var(--card);}
+.mcaption-title{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mcaption-date{font-size:11px;color:var(--muted);}
+
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;color:var(--muted);}
+.empty p{font-size:16px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+
+/* ── DETAIL ── */
+.detail{display:grid;grid-template-columns:1fr 360px;height:100%;overflow:hidden;}
+@media(max-width:900px){.detail{grid-template-columns:1fr;grid-template-rows:1fr auto;}}
+.det-photo-wrap{position:relative;background:#0e0e14;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.det-img{max-width:100%;max-height:100%;object-fit:contain;display:block;}
+.det-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.1);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);color:#fff;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;transition:background .13s;}
+.det-nav:hover{background:rgba(255,255,255,.2);}
+.det-nav.l{left:16px;}.det-nav.r{right:16px;}
+.det-ctr{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.6);font-weight:500;background:rgba(0,0,0,.3);backdrop-filter:blur(4px);padding:4px 12px;border-radius:50px;}
+
+.det-panel{border-left:.5px solid var(--rule);overflow-y:auto;display:flex;flex-direction:column;background:var(--bg);}
+.det-panel-top{padding:20px 24px 16px;border-bottom:.5px solid var(--rule);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.det-back{background:none;border:none;color:var(--muted);font-size:13px;font-family:var(--ff);cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;}
+.det-back:hover{color:var(--ink);}
+.det-fav{background:none;border:none;font-size:20px;cursor:pointer;transition:transform .13s;}
+.det-fav:hover{transform:scale(1.2);}
+.det-info{padding:24px 24px 0;flex:1;}
+.det-title{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1.2;}
+.det-date{font-size:13px;color:var(--acc);font-weight:600;margin-bottom:20px;}
+.meta-row{display:flex;align-items:flex-start;gap:12px;padding:13px 0;border-top:.5px solid var(--rule);font-size:14px;color:var(--ink);}
+.meta-ico{color:var(--muted);font-size:15px;margin-top:1px;flex-shrink:0;width:18px;text-align:center;}
+.meta-lbl{font-size:11px;color:var(--muted);display:block;margin-bottom:2px;}
+.tags{display:flex;flex-wrap:wrap;gap:5px;}
+.tag{padding:3px 10px;background:var(--accl);color:var(--acc);border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--ff);transition:background .13s;}
+.tag:hover{background:var(--acc);color:#fff;}
+.det-acts{padding:20px 24px 28px;display:flex;gap:8px;flex-shrink:0;}
+.act-btn{flex:1;padding:10px;border-radius:var(--r);border:1px solid var(--rule);background:var(--card);color:var(--ink);font-size:13px;font-family:var(--ff);cursor:pointer;transition:background .13s;}
+.act-btn:hover{background:var(--accl);}
+.act-btn.danger{color:#c03030;border-color:rgba(192,48,48,.2);}
+.act-btn.danger:hover{background:rgba(192,48,48,.08);}
+
+/* ── ADMIN DRAWER (right side) ── */
+.adm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);backdrop-filter:blur(4px);z-index:100;display:flex;justify-content:flex-end;transition:opacity .22s;}
+.adm-overlay.off{opacity:0;pointer-events:none;}
+.adm-drawer{width:420px;height:100%;background:var(--bg);border-left:.5px solid var(--rule);display:flex;flex-direction:column;overflow:hidden;transition:transform .28s cubic-bezier(.32,.72,0,1);box-shadow:-20px 0 60px rgba(0,0,0,.12);}
+.adm-overlay.off .adm-drawer{transform:translateX(100%);}
+@media(max-width:600px){.adm-drawer{width:100%;}}
+.adm-top{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 16px;border-bottom:.5px solid var(--rule);flex-shrink:0;}
+.adm-title{font-weight:700;font-size:16px;color:var(--ink);}
+.close-btn{background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;padding:0 0 2px;transition:color .13s;}
+.close-btn:hover{color:var(--ink);}
+.adm-tabs{display:flex;border-bottom:.5px solid var(--rule);flex-shrink:0;}
+.atab{flex:1;padding:11px 4px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-size:12px;font-family:var(--ff);cursor:pointer;font-weight:500;transition:all .14s;}
+.atab.on{color:var(--acc);border-bottom-color:var(--acc);font-weight:700;}
+.abody{flex:1;overflow-y:auto;padding:16px 20px 32px;}
+
+/* FORM */
+.fl{font-size:12px;color:var(--muted);display:block;margin-bottom:4px;}
+.fi{width:100%;padding:9px 12px;background:var(--card);border:1px solid var(--rule);border-radius:var(--r);color:var(--ink);font-size:14px;font-family:var(--ff);outline:none;transition:border-color .13s;}
+.fi:focus{border-color:var(--acc);}
+.fg{margin-bottom:10px;}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.btn-p{width:100%;padding:12px;background:var(--ink);color:var(--bg);border:none;border-radius:var(--r);font-size:14px;font-weight:600;font-family:var(--ff);cursor:pointer;transition:opacity .14s;}
+.btn-p:hover{opacity:.88;}
+.btn-p:disabled{opacity:.32;cursor:default;}
+.btn-s{width:100%;padding:11px;background:var(--card);color:var(--muted);border:1px solid var(--rule);border-radius:var(--r);font-size:14px;font-family:var(--ff);cursor:pointer;transition:background .13s;}
+.btn-s:hover{background:var(--accl);color:var(--ink);}
+.shd{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 0 6px;border-top:.5px solid var(--rule);}
+.shd:first-child{border-top:none;padding-top:0;}
+.info-box{padding:10px 12px;background:var(--accl);border-radius:var(--r);font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:10px;}
+
+/* Login */
+.adm-login{padding:24px 20px;display:flex;flex-direction:column;gap:10px;}
+
+/* Photo list */
+.pli{display:flex;align-items:center;gap:10px;padding:8px;background:var(--card);border-radius:var(--r);margin-bottom:6px;transition:background .13s;}
+.pli:hover{background:var(--accl);}
+.pli-thumb{width:48px;height:48px;border-radius:8px;overflow:hidden;flex-shrink:0;background:var(--rule);}
+.pli-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.pli-info{flex:1;min-width:0;}
+.pli-name{font-size:13px;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pli-sub{font-size:11px;color:var(--muted);}
+.ico-btn{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;font-size:15px;line-height:1;transition:background .13s;}
+.ico-btn:hover{background:var(--rule);}
+
+/* Palette grid */
+.pal-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pal-opt{padding:10px 12px;border-radius:var(--r);border:2px solid transparent;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:var(--ff);transition:border-color .13s;}
+.pal-opt.on{border-color:var(--acc);}
+.pal-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.pal-nm{font-size:13px;font-weight:500;}
+
+input[type=range]{width:100%;height:4px;background:var(--rule);accent-color:var(--acc);cursor:pointer;display:block;margin-top:6px;}
+.fcheck{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--muted);}
+.fcheck input{accent-color:var(--acc);width:15px;height:15px;}
+.export-box{padding:12px;background:var(--card);border:1px solid var(--rule);border-radius:var(--r);font-size:13px;color:var(--muted);line-height:1.55;margin-top:10px;}
+.export-box strong{color:var(--ink);}
+#qr-out{display:flex;justify-content:center;padding:16px 0;}
+#qr-out canvas{border-radius:8px;}
+
+/* FAB add button in gallery */
+.gal-add{display:flex;align-items:center;gap:7px;padding:8px 18px;background:var(--ink);color:var(--bg);border:none;border-radius:50px;font-size:13px;font-weight:600;font-family:var(--ff);cursor:pointer;transition:opacity .14s;flex-shrink:0;}
+.gal-add:hover{opacity:.85;}
+
+/* Responsive: hide sidebar on small screens, show mobile nav */
+@media(max-width:768px){
+  :root{--sb:0px;}
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .mob-nav{display:flex;}
+}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:64px;background:var(--bg);border-top:.5px solid var(--rule);z-index:50;align-items:center;justify-content:space-around;}
+.mob-nb{background:none;border:none;color:var(--muted);font-size:10px;font-family:var(--ff);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:500;}
+.mob-nb.on{color:var(--acc);}
+.mob-nb svg{width:20px;height:20px;}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ── SIDEBAR ── -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-title">Notre <em>année.</em></div>
+    <span class="sb-year" id="sb-year"><span class="sb-year-dot"></span><span id="sb-yr-txt"></span></span>
+  </div>
+  <nav class="sb-nav">
+    <button class="sb-btn on" id="nb-cover" onclick="goCover()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="12" rx="2"/><path d="M3 19h18M8 19v2m8-2v2"/></svg>
+      Couverture
+    </button>
+    <button class="sb-btn" id="nb-gal" onclick="goGal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Galerie
+    </button>
+    <div class="sb-season-group">
+      <span class="sb-season-label">Par saison</span>
+      <button class="sb-btn" onclick="goGalFilter('printemps')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12M12 12C12 7 7 2 7 2s0 5 5 10zM12 12c0-5 5-10 5-10s0 5-5 10z"/></svg>
+        Printemps
+      </button>
+      <button class="sb-btn" onclick="goGalFilter('été')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        Été
+      </button>
+      <button class="sb-btn" onclick="goGalFilter('automne')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8C8 10 5.9 16.17 3.82 22"/><path d="M9.5 8C7 12.5 7 17 8 22"/><path d="M14.5 8C16.5 11 16.9 15 16 22"/><path d="M20 8c0 0-4 2-8 10"/></svg>
+        Automne
+      </button>
+      <button class="sb-btn" onclick="goGalFilter('hiver')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 7l-5 5-5-5M17 17l-5-5-5 5"/><path d="M2 12l5-5 5 5 5-5 5 5M2 12l5 5 5-5 5 5 5-5"/></svg>
+        Hiver
+      </button>
+      <button class="sb-btn" onclick="goGalFilter('favoris')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Favoris
+      </button>
+    </div>
+  </nav>
+  <div class="sb-bottom">
+    <p class="sb-count"><strong id="sb-count-n">0</strong> souvenir<span id="sb-count-s"></span></p>
+    <button class="sb-btn" onclick="openAdmin('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Réglages
+    </button>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- COVER -->
+  <div class="screen" id="s-cover">
+    <div class="cover">
+      <div class="cover-left">
+        <p class="cover-eyebrow" id="cov-eye"></p>
+        <h1 class="cover-title">Notre <em>année.</em></h1>
+        <p class="cover-subtitle" id="cov-sub"></p>
+        <p class="cover-count" id="cov-cnt"></p>
+        <button class="cover-cta" onclick="goGal()"><div class="cover-cta-dot"></div>Explorer l'album</button>
+      </div>
+      <div class="cover-right">
+        <div class="pile-wrap" id="cov-pile"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GALLERY -->
+  <div class="screen off" id="s-gal">
+    <div class="gallery">
+      <div class="gal-bar">
+        <div class="gal-bar-top">
+          <div class="gal-title">Votre <em>année</em></div>
+          <div class="search-wrap">
+            <span class="search-icon">⌕</span>
+            <input class="search-in" id="search" type="search" placeholder="Titre, lieu, personne…" oninput="onSearch()">
+          </div>
+          <button class="gal-add" onclick="openAdmin('add')">+ Ajouter</button>
+        </div>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="gal-content">
+        <div id="gal-grid"></div>
+        <div class="empty off" id="gal-empty"><p>Aucun résultat</p><span>Essayez un autre filtre</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="screen off" id="s-det">
+    <div class="detail" style="height:100dvh;">
+      <div class="det-photo-wrap">
+        <img class="det-img" id="det-img" src="" alt="">
+        <button class="det-nav l" onclick="navDet(-1)">‹</button>
+        <button class="det-nav r" onclick="navDet(1)">›</button>
+        <div class="det-ctr" id="det-ctr"></div>
+      </div>
+      <div class="det-panel">
+        <div class="det-panel-top">
+          <button class="det-back" onclick="goGal()">← Retour</button>
+          <button class="det-fav" id="fav-btn" onclick="toggleFav()">♡</button>
+        </div>
+        <div class="det-info">
+          <div class="det-title" id="det-title"></div>
+          <div class="det-date" id="det-date"></div>
+          <div class="meta-row" id="m-loc" style="display:none"><span class="meta-ico">◎</span><div><span class="meta-lbl">Lieu</span><span id="m-loc-v"></span></div></div>
+          <div class="meta-row" id="m-ppl" style="display:none"><span class="meta-ico">○</span><div><span class="meta-lbl">Personnes</span><span id="m-ppl-v"></span></div></div>
+          <div class="meta-row" id="m-tags" style="display:none"><span class="meta-ico">◇</span><div><span class="meta-lbl">Tags</span><div class="tags" id="m-tags-v"></div></div></div>
+        </div>
+        <div class="det-acts">
+          <button class="act-btn" onclick="sharePhoto()">↗ Partager</button>
+          <button class="act-btn danger" onclick="delCurrent()">✕ Supprimer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- Mobile bottom nav -->
+<div class="mob-nav">
+  <button class="mob-nb on" onclick="goCover()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="12" rx="2"/><path d="M3 19h18"/></svg>
+    Accueil
+  </button>
+  <button class="mob-nb" onclick="goGal()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    Galerie
+  </button>
+  <button class="mob-nb" onclick="openAdmin('settings')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+    Réglages
+  </button>
+</div>
+
+<!-- ── ADMIN DRAWER ── -->
+<div class="adm-overlay off" id="adm-overlay" onclick="maybeClose(event)">
+<div class="adm-drawer">
+  <div class="adm-top">
+    <span class="adm-title">Administration</span>
+    <button class="close-btn" onclick="closeAdmin()">×</button>
+  </div>
+  <div id="adm-login" class="adm-login">
+    <p style="font-size:14px;color:var(--muted)">Entrez le mot de passe pour gérer l'album.</p>
+    <div class="fg"><input class="fi" type="password" id="pw-in" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <span id="pw-err" style="color:#c03030;font-size:12px;display:none">Mot de passe incorrect.</span>
+    <button class="btn-p" onclick="doLogin()">Entrer</button>
+    <p style="font-size:11px;color:var(--muted);text-align:center;opacity:.6;margin-top:4px">Par défaut : famille2024</p>
+  </div>
+  <div id="adm-ui" style="display:none;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
+    <div class="adm-tabs">
+      <button class="atab on" data-t="photos" onclick="setTab('photos')">Photos</button>
+      <button class="atab" data-t="add" onclick="setTab('add')">+ Ajouter</button>
+      <button class="atab" data-t="settings" onclick="setTab('settings')">Réglages</button>
+      <button class="atab" data-t="qr" onclick="setTab('qr')">QR Code</button>
+    </div>
+    <div class="abody" id="abody"></div>
+  </div>
+</div>
+</div>
+
+<script>
+/* ── EMBEDDED DATA ── */
+const PHOTOS_EMBEDDED = null;
+const SETTINGS_EMBEDDED = null;
+
+const D_SETTINGS={familyName:'la famille Moreau',year:'2024',subtitle:'Souvenirs entre famille, voyages et petits bonheurs du quotidien.',palette:'peche',tweaks:{radius:12,density:'regular',captions:true},password:'famille2024',deployedUrl:''};
+const D_PHOTOS=[
+  {id:'d1',src:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800',title:'Lac de montagne',date:'2024-07-15',loc:'Alpes',people:['Papa','Léa'],tags:['été','nature'],fav:true},
+  {id:'d2',src:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800',title:'Forêt du matin',date:'2024-08-08',loc:'Vosges',people:['Léa','Théo'],tags:['été'],fav:false},
+  {id:'d3',src:'https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800',title:'Coucher de soleil',date:'2024-03-18',loc:'Bretagne',people:['Maman','Papa'],tags:['printemps'],fav:true},
+  {id:'d4',src:'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=800',title:'Soirée en famille',date:'2024-04-05',loc:'À la maison',people:['Toute la famille'],tags:['printemps'],fav:false},
+  {id:'d5',src:'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800',title:'Randonnée automnale',date:'2024-09-22',loc:'Vercors',people:['Papa','Léa','Théo'],tags:['automne','rando'],fav:true},
+  {id:'d6',src:'https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=800',title:'Première neige',date:'2024-12-08',loc:'Alsace',people:['Toute la famille'],tags:['hiver'],fav:false},
+];
+const PALETTES={
+  peche:{bg:'#fdf5ec',card:'#fffaf2',ink:'#2a1f15',muted:'#9c8775',rule:'#ead9c5',acc:'#c97355',accl:'rgba(201,115,85,0.12)',name:'Pêche'},
+  brume:{bg:'#f0f3f7',card:'#fbfcfe',ink:'#1a2030',muted:'#6e7a8a',rule:'#d6dde6',acc:'#4056a8',accl:'rgba(64,86,168,0.12)',name:'Brume'},
+  sauge:{bg:'#f1f3ed',card:'#fbfcf7',ink:'#1f2520',muted:'#7a8474',rule:'#d6dccd',acc:'#3d6e4a',accl:'rgba(61,110,74,0.12)',name:'Sauge'},
+  encre:{bg:'#14141a',card:'#1f1e26',ink:'#f0ece4',muted:'#8a8696',rule:'#2e2d36',acc:'#c9982b',accl:'rgba(201,152,43,0.14)',name:'Encre nuit'},
+};
+const MONTHS=['jan.','fév.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+const SEASONS={printemps:'Printemps',été:'Été',automne:'Automne',hiver:'Hiver'};
+
+let photos=[],settings={},curScreen='cover';
+let filter='tout',search='',detIdx=0,detList=[];
+let admAuth=false,admTab='photos',editId=null;
+
+function init(){
+  if(SETTINGS_EMBEDDED) settings={...SETTINGS_EMBEDDED};
+  else{const s=localStorage.getItem('a_settings_d');settings=s?{...D_SETTINGS,...JSON.parse(s)}:{...D_SETTINGS};}
+  if(!settings.tweaks)settings.tweaks={...D_SETTINGS.tweaks};
+  if(PHOTOS_EMBEDDED)photos=JSON.parse(JSON.stringify(PHOTOS_EMBEDDED));
+  else{const p=localStorage.getItem('a_photos_d');photos=p?JSON.parse(p):JSON.parse(JSON.stringify(D_PHOTOS));}
+  applyPal(settings.palette);
+  applyTweaks();
+  updateSidebar();
+  renderCover();
+  document.addEventListener('keydown',handleKey);
+}
+function applyPal(k){
+  const p=PALETTES[k]||PALETTES.peche;
+  const r=document.documentElement;
+  ['bg','card','ink','muted','rule','acc','accl'].forEach(n=>r.style.setProperty('--'+n,p[n]));
+  document.title='Notre année · '+settings.year;
+}
+function applyTweaks(){document.documentElement.style.setProperty('--r',(settings.tweaks?.radius??12)+'px');}
+function save(){localStorage.setItem('a_settings_d',JSON.stringify(settings));localStorage.setItem('a_photos_d',JSON.stringify(photos));}
+
+const uid=()=>'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+function getSeason(d){if(!d)return'été';const m=+d.split('-')[1];return m<=2||m===12?'hiver':m<=5?'printemps':m<=8?'été':'automne';}
+function fmtDate(d){if(!d)return'';const[y,m,dd]=d.split('-');return`${+dd} ${MONTHS[+m-1]} ${y}`;}
+function plural(n,w){return`${n} ${w}${n>1?'s':''}`;}
+function getFiltered(){
+  return photos
+    .filter(p=>filter==='favoris'?p.fav:['printemps','été','automne','hiver'].includes(filter)?getSeason(p.date)===filter:true)
+    .filter(p=>{if(!search.trim())return true;const q=search.toLowerCase();return(p.title||'').toLowerCase().includes(q)||(p.loc||'').toLowerCase().includes(q)||(p.people||[]).some(x=>x.toLowerCase().includes(q))||(p.tags||[]).some(x=>x.toLowerCase().includes(q));})
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+}
+function updateSidebar(){
+  document.getElementById('sb-yr-txt').textContent=settings.year;
+  const n=photos.length;
+  document.getElementById('sb-count-n').textContent=n;
+  document.getElementById('sb-count-s').textContent=n>1?'s':'';
+  ['cover','gal'].forEach(id=>{
+    const btn=document.getElementById('nb-'+id);
+    if(btn)btn.classList.toggle('on',curScreen===id||(curScreen==='det'&&id==='gal'));
+  });
+}
+function show(name){
+  ['cover','gal','det'].forEach(s=>document.getElementById('s-'+s).classList.toggle('off',s!==name));
+  curScreen=name;
+  updateSidebar();
+}
+function goCover(){show('cover');renderCover();}
+function goGal(){filter='tout';show('gal');renderGal();}
+function goGalFilter(f){filter=f;show('gal');renderGal();}
+
+/* ── COVER ── */
+function renderCover(){
+  document.getElementById('cov-eye').textContent=`${settings.year} · ${settings.familyName}`;
+  document.getElementById('cov-sub').textContent=settings.subtitle;
+  document.getElementById('cov-cnt').textContent=plural(photos.length,'souvenir');
+  const favs=photos.filter(p=>p.fav);
+  const pile=(favs.length>=3?favs:photos).slice(0,3);
+  document.getElementById('cov-pile').innerHTML=pile.map(p=>`<div class="pile-card"><img src="${p.src}" alt="" loading="lazy" onerror="this.style.opacity='.2'"></div>`).join('');
+}
+
+/* ── GALLERY ── */
+function renderGal(){
+  const FLTS=['tout','favoris','printemps','été','automne','hiver'];
+  const FLB={tout:'Tout',favoris:'★ Favoris',printemps:'Printemps',été:'Été',automne:'Automne',hiver:'Hiver'};
+  document.getElementById('chips').innerHTML=FLTS.map(f=>`<button class="chip${filter===f?' on':''}" onclick="setFilter('${f}')">${FLB[f]}</button>`).join('');
+  const filtered=getFiltered();
+  const grid=document.getElementById('gal-grid');
+  const empty=document.getElementById('gal-empty');
+  if(!filtered.length){grid.innerHTML='';empty.classList.remove('off');return;}
+  empty.classList.add('off');
+  const density=settings.tweaks?.density||'regular';
+  const cols=density==='compact'?4:density==='spacious'?2:3;
+  const caps=settings.tweaks?.captions!==false;
+  let html='';
+  if(filter==='tout'&&!search.trim()){
+    ['printemps','été','automne','hiver'].forEach(s=>{
+      const sp=filtered.filter(p=>getSeason(p.date)===s);
+      if(!sp.length)return;
+      html+=`<div class="season-hd">${SEASONS[s]}</div><div class="mosaic ${density}" style="column-count:${cols}">`;
+      sp.forEach(p=>html+=cardHTML(p,caps));
+      html+='</div>';
+    });
+  } else {
+    html=`<div class="mosaic ${density}" style="column-count:${cols}">`;
+    filtered.forEach(p=>html+=cardHTML(p,caps));
+    html+='</div>';
+  }
+  grid.innerHTML=html;
+}
+function cardHTML(p,caps){
+  return`<div class="mphoto" onclick="openDet('${p.id}')"><img src="${p.src}" alt="${(p.title||'').replace(/"/g,'')}" loading="lazy" onerror="this.style.opacity='.2'">${p.fav?'<div class="fav-pin">♥</div>':''}${caps&&p.title?`<div class="mcaption"><div class="mcaption-title">${p.title}</div>${p.date?`<div class="mcaption-date">${fmtDate(p.date)}</div>`:''}</div>`:''}</div>`;
+}
+function setFilter(f){filter=f;renderGal();}
+function onSearch(){search=document.getElementById('search').value;renderGal();}
+
+/* ── DETAIL ── */
+function openDet(id){
+  detList=getFiltered();
+  const i=detList.findIndex(p=>p.id===id);
+  detIdx=i>=0?i:0;
+  show('det');renderDet();
+}
+function renderDet(){
+  const p=detList[detIdx];if(!p)return;
+  document.getElementById('det-img').src=p.src;
+  document.getElementById('det-title').textContent=p.title||'Sans titre';
+  document.getElementById('det-date').textContent=fmtDate(p.date);
+  document.getElementById('det-ctr').textContent=`${detIdx+1} / ${detList.length}`;
+  const fb=document.getElementById('fav-btn');
+  fb.textContent=p.fav?'♥':'♡';fb.style.color=p.fav?'var(--acc)':'var(--muted)';
+  const ml=document.getElementById('m-loc');if(p.loc){ml.style.display='flex';document.getElementById('m-loc-v').textContent=p.loc;}else ml.style.display='none';
+  const mp=document.getElementById('m-ppl');if(p.people&&p.people.length){mp.style.display='flex';document.getElementById('m-ppl-v').textContent=p.people.join(', ');}else mp.style.display='none';
+  const mt=document.getElementById('m-tags');if(p.tags&&p.tags.length){mt.style.display='flex';document.getElementById('m-tags-v').innerHTML=p.tags.map(t=>`<span class="tag" onclick="filterByTag('${t}')">${t}</span>`).join('');}else mt.style.display='none';
+}
+function navDet(d){const i=detIdx+d;if(i<0||i>=detList.length)return;detIdx=i;renderDet();}
+function toggleFav(){
+  const p=detList[detIdx];if(!p)return;
+  const idx=photos.findIndex(x=>x.id===p.id);if(idx<0)return;
+  photos[idx].fav=!photos[idx].fav;detList[detIdx].fav=photos[idx].fav;
+  save();renderDet();
+}
+function delCurrent(){
+  const p=detList[detIdx];if(!p||!confirm(`Supprimer "${p.title||'cette photo'}" ?`))return;
+  photos=photos.filter(x=>x.id!==p.id);detList=detList.filter(x=>x.id!==p.id);
+  save();if(!detList.length){goGal();return;}
+  detIdx=Math.min(detIdx,detList.length-1);renderDet();
+}
+function sharePhoto(){const p=detList[detIdx];if(!p)return;if(navigator.share)navigator.share({title:p.title,url:p.src}).catch(()=>{});else navigator.clipboard?.writeText(p.src).then(()=>alert('Lien copié !'));}
+function filterByTag(t){if(['printemps','été','automne','hiver'].includes(t))filter=t;goGal();}
+function handleKey(e){
+  if(curScreen!=='det'||document.activeElement.tagName==='INPUT')return;
+  if(e.key==='ArrowLeft')navDet(-1);
+  if(e.key==='ArrowRight')navDet(1);
+  if(e.key==='Escape')goGal();
+}
+
+/* ── ADMIN ── */
+function openAdmin(tab){
+  admTab=tab||'photos';editId=null;
+  document.getElementById('adm-overlay').classList.remove('off');
+  if(admAuth){showAuthUI();setTab(admTab);}
+  else{document.getElementById('adm-login').style.display='flex';document.getElementById('adm-ui').style.display='none';setTimeout(()=>document.getElementById('pw-in').focus(),120);}
+}
+function closeAdmin(){
+  document.getElementById('adm-overlay').classList.add('off');
+  if(curScreen==='gal')renderGal();if(curScreen==='cover')renderCover();
+  updateSidebar();
+}
+function maybeClose(e){if(e.target===document.getElementById('adm-overlay'))closeAdmin();}
+function doLogin(){
+  if(document.getElementById('pw-in').value===settings.password){
+    admAuth=true;document.getElementById('pw-err').style.display='none';
+    document.getElementById('pw-in').value='';showAuthUI();setTab(admTab);
+  } else document.getElementById('pw-err').style.display='block';
+}
+function showAuthUI(){document.getElementById('adm-login').style.display='none';document.getElementById('adm-ui').style.display='flex';}
+function setTab(t){
+  admTab=t;
+  document.querySelectorAll('.atab').forEach(el=>el.classList.toggle('on',el.dataset.t===t));
+  renderTab();
+}
+function renderTab(){
+  const body=document.getElementById('abody');body.scrollTop=0;
+  if(admTab==='photos'){
+    if(!photos.length){body.innerHTML='<div class="empty" style="height:200px"><p>Aucune photo</p><span>Utilisez "+ Ajouter"</span></div>';return;}
+    body.innerHTML=[...photos].reverse().map(p=>`<div class="pli"><div class="pli-thumb"><img src="${p.src}" alt="" loading="lazy" onerror="this.style.opacity='.2'"></div><div class="pli-info"><div class="pli-name">${p.title||'Sans titre'}${p.fav?' ♥':''}</div><div class="pli-sub">${fmtDate(p.date)}${p.loc?' · '+p.loc:''}</div></div><div style="display:flex;gap:4px"><button class="ico-btn" style="color:var(--acc)" onclick="editPhoto('${p.id}')">✎</button><button class="ico-btn" style="color:#c03030" onclick="delPhoto('${p.id}')">✕</button></div></div>`).join('');return;
+  }
+  if(admTab==='add'){
+    const ed=editId?photos.find(x=>x.id===editId):null;
+    const f=ed||{id:'',src:'',title:'',date:'',loc:'',people:[],tags:[],fav:false};
+    body.innerHTML=`${ed?`<div class="info-box">Modification de « ${ed.title||'sans titre'} »</div>`:''}
+      <div class="fg"><label class="fl">URL de l'image *</label><input class="fi" id="f-src" placeholder="https://…" value="${f.src}" oninput="prevImg()"></div>
+      <div id="img-prev" style="border-radius:var(--r);overflow:hidden;height:100px;background:var(--rule);display:${f.src?'block':'none'};margin-bottom:10px"><img id="img-prev-img" src="${f.src}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.style.display='none'"></div>
+      <div class="fg"><label class="fl">Titre</label><input class="fi" id="f-title" placeholder="Premier sourire…" value="${f.title||''}"></div>
+      <div class="frow"><div class="fg"><label class="fl">Date</label><input class="fi" id="f-date" type="date" value="${f.date||''}"></div><div class="fg"><label class="fl">Lieu</label><input class="fi" id="f-loc" placeholder="Paris…" value="${f.loc||''}"></div></div>
+      <div class="fg"><label class="fl">Personnes (virgules)</label><input class="fi" id="f-ppl" placeholder="Léa, Papa…" value="${(f.people||[]).join(', ')}"></div>
+      <div class="fg"><label class="fl">Tags (virgules)</label><input class="fi" id="f-tags" placeholder="été, vacances…" value="${(f.tags||[]).join(', ')}"></div>
+      <label class="fcheck fg" style="margin-bottom:14px"><input type="checkbox" id="f-fav" ${f.fav?'checked':''}> Favori ♥</label>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px"><button class="btn-s" onclick="cancelEdit()">Annuler</button><button class="btn-p" onclick="savePhoto()">${ed?'Mettre à jour':'Ajouter'}</button></div>`;return;
+  }
+  if(admTab==='settings'){
+    const t=settings.tweaks||{};
+    body.innerHTML=`<div class="shd">Album</div>
+      <div class="fg"><label class="fl">Nom de la famille</label><input class="fi" id="s-fam" value="${settings.familyName||''}"></div>
+      <div class="frow"><div class="fg"><label class="fl">Année</label><input class="fi" id="s-yr" value="${settings.year||''}"></div><div class="fg"><label class="fl">Nouveau mot de passe</label><input class="fi" id="s-pw" type="password" placeholder="Laisser vide = inchangé"></div></div>
+      <div class="fg"><label class="fl">Sous-titre</label><input class="fi" id="s-sub" value="${settings.subtitle||''}"></div>
+      <div class="shd">Palette</div>
+      <div class="pal-grid">${Object.entries(PALETTES).map(([k,v])=>`<button class="pal-opt${settings.palette===k?' on':''}" style="background:${v.bg}" onclick="pickPal('${k}')"><span class="pal-dot" style="background:${v.acc}"></span><span class="pal-nm" style="color:${v.ink}">${v.name}</span></button>`).join('')}</div>
+      <div class="shd">Affichage</div>
+      <div class="fg"><label class="fl">Coins arrondis : <span id="rv">${t.radius??12}</span>px</label><input type="range" min="2" max="24" step="1" value="${t.radius??12}" oninput="updR(this.value)"></div>
+      <div class="fg"><label class="fl">Densité de grille</label><div style="display:flex;gap:6px">${[['compact','4 col'],['regular','3 col'],['spacious','2 col']].map(([k,l])=>`<button onclick="updD('${k}')" style="flex:1;padding:8px 4px;background:${(t.density||'regular')===k?'var(--accl)':'var(--card)'};border:1px solid ${(t.density||'regular')===k?'var(--acc)':'var(--rule)'};border-radius:var(--r);color:${(t.density||'regular')===k?'var(--acc)':'var(--muted)'};font-size:12px;cursor:pointer;font-family:var(--ff)">${l}</button>`).join('')}</div></div>
+      <label class="fcheck fg"><input type="checkbox" id="s-caps" ${t.captions!==false?'checked':''} onchange="updC(this.checked)"> Titres sous les photos</label>
+      <button class="btn-p" onclick="saveSettings()">Enregistrer</button>
+      <div class="shd">Publier</div>
+      <div class="export-box"><strong>Comment partager via QR code :</strong><br>1. Cliquez "Générer le fichier".<br>2. Glissez le fichier sur <strong>drop.netlify.com</strong>.<br>3. Copiez l'URL dans l'onglet QR Code.</div>
+      <div style="margin-top:10px"><button class="btn-s" onclick="exportAlbum()">↓ Générer le fichier</button></div>`;return;
+  }
+  if(admTab==='qr'){
+    body.innerHTML=`<div class="fg"><label class="fl">URL de l'album déployé</label><input class="fi" id="qr-url" placeholder="https://votre-album.netlify.app" value="${settings.deployedUrl||''}" oninput="genQR()"></div><div id="qr-out"></div><p id="qr-hint" style="text-align:center;font-size:13px;color:var(--muted);padding:6px 0">${settings.deployedUrl?'Scannez pour ouvrir l\'album':'Entrez l\'URL pour générer le QR code'}</p>${settings.deployedUrl?'<button class="btn-s" onclick="dlQR()">↓ Télécharger le QR</button>':''}`;
+    if(settings.deployedUrl)genQR();return;
+  }
+}
+function prevImg(){const s=document.getElementById('f-src').value.trim();const pr=document.getElementById('img-prev');if(s){pr.style.display='block';document.getElementById('img-prev-img').src=s;}else pr.style.display='none';}
+function editPhoto(id){editId=id;setTab('add');}
+function cancelEdit(){editId=null;setTab('photos');}
+function savePhoto(){
+  const src=document.getElementById('f-src').value.trim();if(!src){alert('URL obligatoire.');return;}
+  const photo={id:editId||uid(),src,title:document.getElementById('f-title').value.trim(),date:document.getElementById('f-date').value,loc:document.getElementById('f-loc').value.trim(),people:document.getElementById('f-ppl').value.split(',').map(x=>x.trim()).filter(Boolean),tags:document.getElementById('f-tags').value.split(',').map(x=>x.trim()).filter(Boolean),fav:document.getElementById('f-fav').checked};
+  if(editId&&photos.find(x=>x.id===editId))photos=photos.map(x=>x.id===editId?photo:x);else photos.unshift(photo);
+  editId=null;save();updateSidebar();setTab('photos');
+}
+function delPhoto(id){const p=photos.find(x=>x.id===id);if(!p||!confirm(`Supprimer "${p.title||'cette photo'}" ?`))return;photos=photos.filter(x=>x.id!==id);save();updateSidebar();renderTab();}
+function pickPal(k){settings.palette=k;applyPal(k);renderTab();}
+function updR(v){settings.tweaks.radius=+v;document.getElementById('rv').textContent=v;applyTweaks();}
+function updD(v){settings.tweaks.density=v;renderTab();}
+function updC(v){settings.tweaks.captions=v;}
+function saveSettings(){
+  const pw=document.getElementById('s-pw').value.trim();
+  settings.familyName=document.getElementById('s-fam').value.trim()||settings.familyName;
+  settings.year=document.getElementById('s-yr').value.trim()||settings.year;
+  settings.subtitle=document.getElementById('s-sub').value.trim()||settings.subtitle;
+  if(pw)settings.password=pw;
+  save();updateSidebar();document.title='Notre année · '+settings.year;
+  alert('Réglages enregistrés !');
+}
+function genQR(){
+  const url=document.getElementById('qr-url').value.trim();settings.deployedUrl=url;save();
+  const out=document.getElementById('qr-out');out.innerHTML='';
+  if(!url)return;
+  if(typeof QRCode==='undefined'){out.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center">Chargement…</p>';return;}
+  const cs=getComputedStyle(document.documentElement);
+  new QRCode(out,{text:url,width:200,height:200,colorDark:cs.getPropertyValue('--ink').trim()||'#000',colorLight:cs.getPropertyValue('--bg').trim()||'#fff',correctLevel:QRCode.CorrectLevel.M});
+}
+function dlQR(){const canvas=document.querySelector('#qr-out canvas');if(!canvas)return;const a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='notre-annee-qrcode.png';a.click();}
+function exportAlbum(){
+  let html=document.documentElement.outerHTML;
+  html=html.replace('const PHOTOS_EMBEDDED = null;',`const PHOTOS_EMBEDDED = ${JSON.stringify(photos)};`);
+  html=html.replace('const SETTINGS_EMBEDDED = null;',`const SETTINGS_EMBEDDED = ${JSON.stringify(settings)};`);
+  const blob=new Blob(['<!DOCTYPE html>\n'+html],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`notre-annee-desktop-${settings.year||'2024'}.html`;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
+}
+
+window.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
